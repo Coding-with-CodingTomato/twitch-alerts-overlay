@@ -1,20 +1,20 @@
 const crypto = require('crypto')
 const express = require('express');
 const cors = require('cors');
-const app = express();
 const { Server } = require('socket.io');
+require('dotenv').config;
+const app = express();
 const http = require('http');
 const server = http.createServer(app);
 
 const port = 8042;
 const socketPort = 8043;
 
-// TODO: update origin url
 const io = new Server(socketPort, {
   cors: {
-    origin: `http://127.0.0.1:8080`
+    origin: process.env.CORS_URL
   }
-})
+});
     
 // Notification request headers
 const TWITCH_MESSAGE_ID = 'Twitch-Eventsub-Message-Id'.toLowerCase();
@@ -27,16 +27,15 @@ const MESSAGE_TYPE_VERIFICATION = 'webhook_callback_verification';
 const MESSAGE_TYPE_NOTIFICATION = 'notification';
 const MESSAGE_TYPE_REVOCATION = 'revocation';
 
-// Prepend this string to the HMAC that's created from the message
 const HMAC_PREFIX = 'sha256=';
 
 app.use(cors());
-app.use(express.raw({          // Need raw message body for signature verification
+app.use(express.raw({
     type: 'application/json'
-}))  
+}));
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  console.log('a new client connected');
 });
 
 app.post('/eventsub', (req, res) => {
@@ -45,18 +44,13 @@ app.post('/eventsub', (req, res) => {
     let hmac = HMAC_PREFIX + getHmac(secret, message);  // Signature to compare
 
     if (true === verifyMessage(hmac, req.headers[TWITCH_MESSAGE_SIGNATURE])) {
-        console.log("signatures match");
-
-        // Get JSON object from body, so you can process the message.
         let notification = JSON.parse(req.body);
         
         if (MESSAGE_TYPE_NOTIFICATION === req.headers[MESSAGE_TYPE]) {
+            // console.log(`Event type: ${notification.subscription.type}`);
+            // console.log(JSON.stringify(notification.event, null, 4));
 
             io.emit(notification.subscription.type, JSON.stringify(notification.event, null, 4));
-
-            console.log(`Event type: ${notification.subscription.type}`);
-            console.log(JSON.stringify(notification.event, null, 4));
-            
             res.sendStatus(204);
         }
         else if (MESSAGE_TYPE_VERIFICATION === req.headers[MESSAGE_TYPE]) {
@@ -78,15 +72,15 @@ app.post('/eventsub', (req, res) => {
         console.log('403');    // Signatures didn't match.
         res.sendStatus(403);
     }
-})
+});
   
 server.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
-})
+  console.log(`EventSub Callback Server laeuft: http://localhost:${port}`);
+});
 
 
 function getSecret() {
-    return "5f1a6e7cd2e7137ccf9e15b2f43fe63949eb84b1db83c1d5a867dc93429de4e4";
+    return process.env.TWITCH_EVENTSUB_SECRET;
 }
 
 // Build the message used to get the HMAC.
