@@ -2,13 +2,16 @@ const crypto = require('crypto')
 const express = require('express');
 const cors = require('cors');
 const { Server } = require('socket.io');
-require('dotenv').config;
+require('dotenv').config();
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
 
 const port = 8042;
 const socketPort = 8043;
+
+console.log("Running with following env:");
+console.log(JSON.stringify(process.env));
 
 const io = new Server(socketPort, {
   cors: {

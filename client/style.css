@@ -10,6 +10,7 @@ body {
   width: 100vw;
   height: 100vh;
   font-family: 'Space Mono', monospace;
+  padding: 1rem;
 }
 
 .alertBox {
@@ -22,7 +23,7 @@ body {
   align-items: center;
   animation: slideIn 10000ms ease-in-out;
   border-radius: 10px;
-  transform: translateX(-100%);
+  transform: translateX(-105%);
 }
 
 .alertBox .icon {
@@ -62,8 +63,8 @@ h3.cheer{
 }
 
 @keyframes slideIn {
-  0% { transform: translateX(-100%); }
-  10% { transform: translateX(2%); }
-  90% { transform: translateX(2%); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(-105%); }
+  10% { transform: translateX(0); }
+  90% { transform: translateX(0); }
+  100% { transform: translateX(-105%); }
 }

@@ -1,4 +1,4 @@
-const socket = io("localhost:8043");
+const socket = io("DOMAINGOESHERE");
 const body = document.querySelector('body');
 
 const sound = new Audio('../assets/sounds/sound1.mp3');
